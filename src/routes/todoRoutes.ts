@@ -1,10 +1,11 @@
 import { Router } from "express";
+import { ratelimiter } from "./../middlewares/rateLimiter";
 const userController = require("../controllers/userController");
 const todoController = require("./../controllers/todoController");
 
 const router = Router();
 
-router.get("/", todoController.getAllTodos);
+router.get("/", ratelimiter, todoController.getAllTodos);
 router.get("/:id", todoController.getTodo);
 router.post("/", todoController.addTodo);
 router.patch("/:id", todoController.editTodo);
