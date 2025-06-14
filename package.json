@@ -13,10 +13,18 @@
     "@prisma/client": "6.9.0",
     "@types/express": "^5.0.2",
     "@types/pg": "^8.15.4",
+    "boxen": "5",
+    "chalk": "^4.1.2",
     "express": "^5.1.0",
+    "figlet": "1.5",
+    "morgan": "^1.10.0",
     "pg": "^8.16.0"
   },
   "devDependencies": {
+    "@types/boxen": "^3.0.5",
+    "@types/chalk": "^2.2.4",
+    "@types/figlet": "^1.7.0",
+    "@types/morgan": "^1.9.10",
     "nodemon": "^3.1.10",
     "prisma": "^6.9.0",
     "ts-node": "^10.9.2",

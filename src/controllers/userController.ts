@@ -3,7 +3,11 @@ import client from "../models/prisma";
 
 exports.getAllUsers = async (req: Request, res: Response) => {
   try {
-    const users = await client.users.findMany();
+    const users = await client.users.findMany({
+      include: {
+        todos: true,
+      },
+    });
 
     if (!users || users.length === 0) {
       return res.json({ message: "No users found" });
@@ -25,6 +29,9 @@ exports.getUser = async (req: Request, res: Response) => {
     }
     const user = await client.users.findUnique({
       where: { id: userId },
+      include: {
+        todos: true,
+      },
     });
     if (!user) {
       return res.status(404).json({ message: "User not found" });
@@ -55,11 +62,17 @@ exports.addUser = async (req: Request, res: Response) => {
       user,
     });
   } catch (err: any) {
+    if (err.code === "P2002" && err.meta?.target?.includes("username")) {
+      return res.json({
+        message: "Username already exists",
+      });
+    }
     return res.json({
       message: err.message,
     });
   }
 };
+
 exports.delete = async (req: Request, res: Response) => {
   try {
     const userId = Number(req.params.id);
