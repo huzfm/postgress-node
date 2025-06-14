@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import client from "../models/prisma";
-
+import { hashPassword, compare } from "../utils/hash";
 exports.getAllUsers = async (req: Request, res: Response) => {
   try {
     const users = await client.users.findMany({
@@ -42,19 +42,29 @@ exports.getUser = async (req: Request, res: Response) => {
     return res.json({ message: err.message });
   }
 };
-exports.addUser = async (req: Request, res: Response) => {
+
+exports.signup = async (req: Request, res: Response) => {
   try {
-    const { username, password } = req.body;
+    const { username, password, confirmPassword } = req.body;
     if (!username) {
       return res.json({ message: "No username" });
     }
     if (!password) {
       return res.json({ message: "No password" });
     }
+    if (!confirmPassword) {
+      return res.json({ message: "Please confirm the password" });
+    }
+    if (password != confirmPassword) {
+      return res.json({
+        message: " passwords do not match",
+      });
+    }
+    const hashed = await hashPassword(password);
     const user = await client.users.create({
       data: {
         username,
-        password,
+        password: hashed,
       },
     });
     return res.json({
@@ -70,6 +80,33 @@ exports.addUser = async (req: Request, res: Response) => {
     return res.json({
       message: err.message,
     });
+  }
+};
+exports.login = async (req: Request, res: Response) => {
+  try {
+    const { username, password } = req.body;
+    const user = await client.users.findFirst({
+      where: { username },
+    });
+    if (!user) {
+      return res.json({
+        message: "No user found please enter valid username",
+      });
+    }
+
+    const isValid = await compare(password, user.password);
+    if (!isValid) {
+      return res.json({
+        message: "Invalid credentials",
+        user,
+      });
+    }
+    res.json({
+      message: "Logged in successfully",
+      user,
+    });
+  } catch (err: any) {
+    return res.json({ message: err.message });
   }
 };
 
