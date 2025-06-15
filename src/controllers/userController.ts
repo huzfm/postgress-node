@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import client from "../models/prisma";
 import { hashPassword, compare } from "../utils/hash";
+import { signToken } from "../utils/jwt";
 exports.getAllUsers = async (req: Request, res: Response) => {
   try {
     const users = await client.users.findMany({
@@ -101,9 +102,11 @@ exports.login = async (req: Request, res: Response) => {
         user,
       });
     }
+    const token = signToken(user.id);
     res.json({
       message: "Logged in successfully",
       user,
+      token,
     });
   } catch (err: any) {
     return res.json({ message: err.message });
