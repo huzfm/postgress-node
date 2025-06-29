@@ -1,0 +1,13 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const rateLimiter_1 = require("./../middlewares/rateLimiter");
+const userController = require("../controllers/userController");
+const todoController = require("./../controllers/todoController");
+const router = (0, express_1.Router)();
+router.get("/", rateLimiter_1.ratelimiter, todoController.getAllTodos);
+router.get("/:id", todoController.getTodo);
+router.post("/", todoController.addTodo);
+router.patch("/:id", todoController.editTodo);
+router.delete("/:id", todoController.deleteTodo);
+exports.default = router;

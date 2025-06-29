@@ -1,21 +1,29 @@
 import { Request, Response } from "express";
 import client from "../models/prisma";
-import { hashPassword, compare } from "../utils/hash";
-import { signToken } from "../utils/jwt";
 exports.getAllUsers = async (req: Request, res: Response) => {
   try {
+    // Get page and limit from query, with default values
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+
+    const skip = (page - 1) * limit;
+
+    // Get users with pagination
     const users = await client.users.findMany({
+      skip,
+      take: limit,
       include: {
         todos: true,
       },
     });
 
-    if (!users || users.length === 0) {
-      return res.json({ message: "No users found" });
-    }
+    // Get total count for metadata
+    const totalUsers = await client.users.count();
 
-    // Return users if found
-    return res.json(users);
+    return res.json({
+      total_users: totalUsers,
+      users,
+    });
   } catch (err) {
     return res.status(500).json({ message: "Error", error: err });
   }
@@ -39,75 +47,6 @@ exports.getUser = async (req: Request, res: Response) => {
     }
 
     return res.json(user);
-  } catch (err: any) {
-    return res.json({ message: err.message });
-  }
-};
-
-exports.signup = async (req: Request, res: Response) => {
-  try {
-    const { username, password, confirmPassword } = req.body;
-    if (!username) {
-      return res.json({ message: "No username" });
-    }
-    if (!password) {
-      return res.json({ message: "No password" });
-    }
-    if (!confirmPassword) {
-      return res.json({ message: "Please confirm the password" });
-    }
-    if (password != confirmPassword) {
-      return res.json({
-        message: " passwords do not match",
-      });
-    }
-    const hashed = await hashPassword(password);
-    const user = await client.users.create({
-      data: {
-        username,
-        password: hashed,
-      },
-    });
-    return res.json({
-      message: "user added sucessfully",
-      user,
-    });
-  } catch (err: any) {
-    if (err.code === "P2002" && err.meta?.target?.includes("username")) {
-      return res.json({
-        message: "Username already exists",
-      });
-    }
-    return res.json({
-      message: err.message,
-    });
-  }
-};
-exports.login = async (req: Request, res: Response) => {
-  try {
-    const { username, password } = req.body;
-    const user = await client.users.findFirst({
-      where: { username },
-    });
-    if (!user) {
-      return res.json({
-        message: "No user found please enter valid username",
-      });
-    }
-
-    const isValid = await compare(password, user.password);
-    if (!isValid) {
-      return res.json({
-        message: "Invalid credentials",
-        user,
-      });
-    }
-    const token = signToken(user.id);
-    res.json({
-      message: "Logged in successfully",
-      user,
-      token,
-    });
   } catch (err: any) {
     return res.json({ message: err.message });
   }

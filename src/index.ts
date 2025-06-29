@@ -8,8 +8,7 @@ const figlet = require("figlet");
 const chalk = require("chalk");
 
 const app = express();
-const PORT = process.env.PORT || 3000;
-
+const PORT = process.env.PORT || 2000;
 app.use(express.json());
 app.use(morgan("dev"));
 

@@ -1,6 +1,5 @@
 import { Router } from "express";
 import { ratelimiter } from "./../middlewares/rateLimiter";
-const userController = require("../controllers/userController");
 const todoController = require("./../controllers/todoController");
 
 const router = Router();

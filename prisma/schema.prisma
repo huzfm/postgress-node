@@ -14,7 +14,7 @@ datasource db {
 }
  model Users {
   id          Int         @default(autoincrement()) @id
-  username    String      @unique
+  username    String      
   password    String
   todos        Todo[]
    }

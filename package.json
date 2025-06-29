@@ -13,6 +13,7 @@
     "@prisma/client": "6.9.0",
     "@types/express": "^5.0.2",
     "@types/pg": "^8.15.4",
+    "axios": "^1.10.0",
     "bcrypt": "^6.0.0",
     "boxen": "5",
     "chalk": "^4.1.2",
