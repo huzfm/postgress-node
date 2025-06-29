@@ -3,69 +3,40 @@ import client from "../models/prisma";
 import { hashPassword, compare } from "../utils/hash";
 import { signToken } from "../utils/jwt";
 
-// exports.signup = async (req: Request, res: Response) => {
-//   try {
-//     const { username, password, confirmPassword } = req.body;
-//     if (!username) {
-//       return res.json({ message: "No username" });
-//     }
-//     if (!password) {
-//       return res.json({ message: "No password" });
-//     }
-//     if (!confirmPassword) {
-//       return res.json({ message: "Please confirm the password" });
-//     }
-//     if (password != confirmPassword) {
-//       return res.json({
-//         message: " passwords do not match",
-//       });
-//     }
-//     const hashed = await hashPassword(password);
-//     const user = await client.users.create({
-//       data: {
-//         username,
-//         password: hashed,
-//       },
-//     });
-//     return res.json({
-//       message: "user added sucessfully",
-//       user,
-//     });
-//   } catch (err: any) {
-//     if (err.code === "P2002" && err.meta?.target?.includes("username")) {
-//       return res.json({
-//         message: "Username already exists",
-//       });
-//     }
-//     return res.json({
-//       message: err.message,
-//     });
-//   }
-// };
-
 exports.signup = async (req: Request, res: Response) => {
   try {
-    const { username, password } = req.body;
-
+    const { username, password, confirmPassword } = req.body;
     if (!username) {
       return res.json({ message: "No username" });
     }
     if (!password) {
       return res.json({ message: "No password" });
     }
-
+    if (!confirmPassword) {
+      return res.json({ message: "Please confirm the password" });
+    }
+    if (password != confirmPassword) {
+      return res.json({
+        message: " passwords do not match",
+      });
+    }
+    const hashed = await hashPassword(password);
     const user = await client.users.create({
       data: {
         username,
-        password,
+        password: hashed,
       },
     });
-
     return res.json({
-      message: "User added successfully",
+      message: "user added sucessfully",
       user,
     });
   } catch (err: any) {
+    if (err.code === "P2002" && err.meta?.target?.includes("username")) {
+      return res.json({
+        message: "Username already exists",
+      });
+    }
     return res.json({
       message: err.message,
     });

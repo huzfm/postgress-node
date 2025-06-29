@@ -1,24 +1,26 @@
 import { Request, Response } from "express";
 import client from "../models/prisma";
+
 exports.getAllUsers = async (req: Request, res: Response) => {
   try {
-    // Get page and limit from query, with default values
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
-
     const skip = (page - 1) * limit;
 
-    // Get users with pagination
-    const users = await client.users.findMany({
-      skip,
-      take: limit,
-      include: {
-        todos: true,
-      },
-    });
-
-    // Get total count for metadata
-    const totalUsers = await client.users.count();
+    const [users, totalUsers] = await client.$transaction([
+      client.users.findMany({
+        skip,
+        take: limit,
+        select: {
+          id: true,
+          username: true,
+          todos: {
+            select: { id: true, title: true },
+          },
+        },
+      }),
+      client.users.count(),
+    ]);
 
     return res.json({
       total_users: totalUsers,
