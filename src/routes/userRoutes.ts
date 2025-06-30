@@ -1,13 +1,13 @@
 import { Router } from "express";
 const userController = require("../controllers/userController");
 const authController = require("../controllers/authController");
-import { authenticate } from "../middlewares/protect";
-
 import { ratelimiter } from "../middlewares/rateLimiter";
+import { validateApiKey } from "../middlewares/validateApiKey";
 
 const router = Router();
 
-router.get("/", ratelimiter, userController.getAllUsers);
+router.get("/", validateApiKey, userController.getAllUsers);
+router.get("/apikey", authController.generateApiKey);
 router.get("/:id", userController.getUser);
 router.post("/signup", authController.signup);
 router.post("/login", authController.login);

@@ -3,6 +3,8 @@ import client from "../models/prisma";
 import { hashPassword, compare } from "../utils/hash";
 import { signToken } from "../utils/jwt";
 
+import * as crypto from "crypto";
+
 exports.signup = async (req: Request, res: Response) => {
   try {
     const { username, password, confirmPassword } = req.body;
@@ -70,5 +72,25 @@ exports.login = async (req: Request, res: Response) => {
     });
   } catch (err: any) {
     return res.json({ message: err.message });
+  }
+};
+
+exports.generateApiKey = async (req: Request, res: Response) => {
+  try {
+    const apiKey = crypto.randomBytes(32).toString("hex");
+
+    await client.apiKey.create({
+      data: {
+        key: apiKey,
+      },
+    });
+
+    res.json({
+      message: "API key generated successfully",
+      apiKey,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Failed to generate API key" });
   }
 };

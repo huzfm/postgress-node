@@ -29,3 +29,9 @@ model Todo {
   @@index([user_id])
 
 }
+model apiKey {
+  id              String        @id @default(uuid())
+  key             String        @unique
+  createdAt       DateTime      @default(now())
+  isActive        Boolean       @default(true)
+}
